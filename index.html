@@ -49,9 +49,10 @@
             return response.json();
           })
           .then(function(data) {
-            document.getElementById('statusDisplay').textContent = data.status || 'No Status';
-            document.getElementById('codeDisplay').textContent = data.code || '--';
-            document.getElementById('updatedAtDisplay').textContent = data.updatedAt || '--';
+            const item = Array.isArray(data) ? data[0] : data;
+            document.getElementById('statusDisplay').textContent = item.status || 'No Status';
+            document.getElementById('codeDisplay').textContent = item.code || '--';
+            document.getElementById('updatedAtDisplay').textContent = item.updatedAt || '--';
           })
           .catch(function(error) {
             console.error('Error fetching data:', error);
@@ -61,4 +62,3 @@
     </script>
   </body>
 </html>
-あ
