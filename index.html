@@ -17,29 +17,41 @@
         <section>
           <article class="mb-10">
             <span class="text-1xl inline-flex font-semibold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-indigo-300 mb-2">
-              Link Code
+              あいことば
             </span>
             <span id="codeDisplay" class="flex text-slate-900 text-7xl font-extrabold mb-2">
               --
             </span>
-            <p class="text-sm text-slate-500">Last Update: <span id="updatedAtDisplay">--</span></p>
+            <p class="text-sm text-slate-500">更新日時: <span id="updatedAtDisplay">--</span></p>
           </article>
         </section>
         <div class="flex items-start gap-2.5 mb-5">
           <img class="w-8 h-8 rounded-full" src="https://pbs.twimg.com/profile_images/1574629552856264706/5rYeyuxr_normal.png" alt="">
           <div class="flex flex-col w-full max-w-[320px] leading-1.5 p-4 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl dark:bg-gray-700">
             <div class="flex items-center space-x-2 rtl:space-x-reverse">
-              <span class="text-sm font-semibold text-gray-900 dark:text-white">Admin</span>
-              <span class="text-sm font-normal text-gray-500 dark:text-gray-400">18:46</span>
+              <span class="text-sm font-semibold text-gray-900 dark:text-white">ほげじん</span>
+              <span class="text-sm font-normal text-gray-500 dark:text-gray-400">00:00</span>
             </div>
             <p class="text-sm font-normal py-2.5 text-gray-900 dark:text-white">
-              Administrator's Message
+              <a href="https://x.com/addshlab" target="_blank">募集してる人のX</a>
             </p>
           </div>
         </div>
       </div>
     </div>
     <script>
+      // UTCの日時をブラウザのローカルタイムゾーンに変換し、YYYY-MM-DD hh:mm:ss形式で返す関数
+      function formatLocalDateTime(utcString) {
+        var date = new Date(utcString);
+        var year = date.getFullYear();
+        var month = (date.getMonth() + 1).toString().padStart(2, '0');
+        var day = date.getDate().toString().padStart(2, '0');
+        var hours = date.getHours().toString().padStart(2, '0');
+        var minutes = date.getMinutes().toString().padStart(2, '0');
+        var seconds = date.getSeconds().toString().padStart(2, '0');
+        return year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
+      }
+      
       document.addEventListener("DOMContentLoaded", function() {
         fetch('https://api.add.sh/unioncirclestatus/status')
           .then(function(response) {
@@ -52,12 +64,18 @@
             const item = Array.isArray(data) ? data[0] : data;
             document.getElementById('statusDisplay').textContent = item.status || 'No Status';
             document.getElementById('codeDisplay').textContent = item.code || '--';
-            document.getElementById('updatedAtDisplay').textContent = item.updatedAt || '--';
+            // updatedAtをローカルタイムゾーンに変換して表示
+            document.getElementById('updatedAtDisplay').textContent = item.updatedAt ? formatLocalDateTime(item.updatedAt) : '--';
           })
           .catch(function(error) {
             console.error('Error fetching data:', error);
             document.getElementById('statusDisplay').textContent = 'Error loading data';
           });
+        
+        // 10秒ごとに画面をリロード
+        setInterval(function() {
+          location.reload();
+        }, 10000);
       });
     </script>
   </body>
