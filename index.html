@@ -40,8 +40,16 @@
       </div>
     </div>
     <script>
-      // UTCの日時をブラウザのローカルタイムゾーンに変換し、YYYY-MM-DD hh:mm:ss形式で返す関数
+      // UTCタイムスタンプ（例："2025-02-27T18:33:32.148877"）を
+      // fractional part を3桁に丸めて "Z" を付加し、ローカルタイムゾーンの日時に変換
+      // その後 "YYYY-MM-DD hh:mm:ss" 形式で返す関数
       function formatLocalDateTime(utcString) {
+        // fractional part が6桁の場合、3桁に丸める（例: ".148877" → ".148"）
+        utcString = utcString.replace(/\.(\d{3})\d+/, '.$1');
+        // タイムゾーン指定がなければ、UTCと仮定して 'Z' を付加する
+        if (!utcString.endsWith('Z') && !utcString.match(/[+\-]\d{2}:\d{2}$/)) {
+          utcString += 'Z';
+        }
         var date = new Date(utcString);
         var year = date.getFullYear();
         var month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -64,7 +72,7 @@
             const item = Array.isArray(data) ? data[0] : data;
             document.getElementById('statusDisplay').textContent = item.status || 'No Status';
             document.getElementById('codeDisplay').textContent = item.code || '--';
-            // updatedAtをローカルタイムゾーンに変換して表示
+            // updatedAt をローカルタイムゾーンに変換して表示
             document.getElementById('updatedAtDisplay').textContent = item.updatedAt ? formatLocalDateTime(item.updatedAt) : '--';
           })
           .catch(function(error) {
