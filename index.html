@@ -6,7 +6,17 @@
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <title>ユニオンサークル募集</title>
   </head>
-  <body>
+  <body class="relative">
+    <!-- 自動リロード切り替えトグルスイッチ（右上） -->
+    <div class="absolute top-4 right-4 flex items-center space-x-2">
+      <span class="text-gray-800">自動更新</span>
+      <label class="relative inline-flex items-center cursor-pointer">
+        <input type="checkbox" id="autoReloadToggle" class="sr-only peer">
+        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full dark:bg-gray-400 peer-checked:bg-green-500"></div>
+        <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-5"></div>
+      </label>
+    </div>
+    
     <div class="flex flex-col justify-center items-center h-[100vh]">
       <div class="!z-5 relative flex flex-col rounded-[20px] max-w-[600px] bg-white bg-clip-border shadow-3xl shadow-shadow-500 w-full !p-6 3xl:p-![18px]">
         <div class="mt-5 mb-10 h-full w-full flex flex-col">
@@ -39,14 +49,15 @@
         </div>
       </div>
     </div>
+    
     <script>
-      // UTCタイムスタンプ（例："2025-02-27T18:33:32.148877"）を
-      // fractional part を3桁に丸めて "Z" を付加し、ローカルタイムゾーンの日時に変換
-      // その後 "YYYY-MM-DD hh:mm:ss" 形式で返す関数
+      // UTCタイムスタンプ（例："2025-02-27T18:33:32.148877"）を、fractional partを3桁に丸め、
+      // タイムゾーン指定が無ければ "Z" を付加し、ブラウザのローカルタイムゾーンの日時に変換して、
+      // "YYYY-MM-DD hh:mm:ss" 形式で返す関数
       function formatLocalDateTime(utcString) {
-        // fractional part が6桁の場合、3桁に丸める（例: ".148877" → ".148"）
+        // fractional part を3桁に丸める（例: ".148877" → ".148"）
         utcString = utcString.replace(/\.(\d{3})\d+/, '.$1');
-        // タイムゾーン指定がなければ、UTCと仮定して 'Z' を付加する
+        // タイムゾーン指定がなければ、UTCとして 'Z' を付加する
         if (!utcString.endsWith('Z') && !utcString.match(/[+\-]\d{2}:\d{2}$/)) {
           utcString += 'Z';
         }
@@ -59,6 +70,23 @@
         var seconds = date.getSeconds().toString().padStart(2, '0');
         return year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
       }
+      
+      // 自動リロード設定
+      let autoReloadInterval = null;
+      
+      // トグルスイッチのイベントリスナー
+      document.getElementById('autoReloadToggle').addEventListener('change', function() {
+        if (this.checked) {
+          // チェックONの場合：30秒ごとにページをリロード
+          autoReloadInterval = setInterval(function() {
+            location.reload();
+          }, 30000);
+        } else {
+          // チェックOFFの場合：タイマーをクリア
+          clearInterval(autoReloadInterval);
+          autoReloadInterval = null;
+        }
+      });
       
       document.addEventListener("DOMContentLoaded", function() {
         fetch('https://api.add.sh/unioncirclestatus/status')
@@ -79,11 +107,6 @@
             console.error('Error fetching data:', error);
             document.getElementById('statusDisplay').textContent = 'Error loading data';
           });
-        
-        // 10秒ごとに画面をリロード
-        setInterval(function() {
-          location.reload();
-        }, 30000);
       });
     </script>
   </body>
