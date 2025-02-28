@@ -51,13 +51,11 @@
     </div>
     
     <script>
-      // UTCタイムスタンプ（例："2025-02-27T18:33:32.148877"）を、fractional partを3桁に丸め、
+      // UTCタイムスタンプ（例："2025-02-27T18:33:32.148877"）を、fractional partを3桁に丸めた上で
       // タイムゾーン指定が無ければ "Z" を付加し、ブラウザのローカルタイムゾーンの日時に変換して、
       // "YYYY-MM-DD hh:mm:ss" 形式で返す関数
       function formatLocalDateTime(utcString) {
-        // fractional part を3桁に丸める（例: ".148877" → ".148"）
-        utcString = utcString.replace(/\.(\d{3})\d+/, '.$1');
-        // タイムゾーン指定がなければ、UTCとして 'Z' を付加する
+        utcString = utcString.replace(/\.(\d{3})\d+/, '.$1'); // fractional partを3桁に丸める
         if (!utcString.endsWith('Z') && !utcString.match(/[+\-]\d{2}:\d{2}$/)) {
           utcString += 'Z';
         }
@@ -71,24 +69,55 @@
         return year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
       }
       
-      // 自動リロード設定
       let autoReloadInterval = null;
+      const STORAGE_KEY = "unioncirclestatus";
+
+      // 初期化: ローカルストレージから自動更新状態を読み込み
+      function initAutoReloadState() {
+        let stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          try {
+            let obj = JSON.parse(stored);
+            return obj.data["auto-reload"] === 1;
+          } catch(e) {
+            console.error("Error parsing localStorage, resetting state.", e);
+          }
+        }
+        // 初期値：オフ
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({"data":{"auto-reload":0}}));
+        return false;
+      }
+      
+      // 自動更新状態をローカルストレージに保存する
+      function saveAutoReloadState(isOn) {
+        const value = isOn ? 1 : 0;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({"data":{"auto-reload":value}}));
+      }
       
       // トグルスイッチのイベントリスナー
       document.getElementById('autoReloadToggle').addEventListener('change', function() {
         if (this.checked) {
-          // チェックONの場合：30秒ごとにページをリロード
           autoReloadInterval = setInterval(function() {
             location.reload();
           }, 30000);
+          saveAutoReloadState(true);
         } else {
-          // チェックOFFの場合：タイマーをクリア
           clearInterval(autoReloadInterval);
           autoReloadInterval = null;
+          saveAutoReloadState(false);
         }
       });
       
       document.addEventListener("DOMContentLoaded", function() {
+        // 初期化: トグルスイッチの状態をローカルストレージから反映
+        const autoReloadOn = initAutoReloadState();
+        document.getElementById('autoReloadToggle').checked = autoReloadOn;
+        if (autoReloadOn) {
+          autoReloadInterval = setInterval(function() {
+            location.reload();
+          }, 30000);
+        }
+      
         fetch('https://api.add.sh/unioncirclestatus/status')
           .then(function(response) {
             if (!response.ok) {
@@ -100,7 +129,6 @@
             const item = Array.isArray(data) ? data[0] : data;
             document.getElementById('statusDisplay').textContent = item.status || 'No Status';
             document.getElementById('codeDisplay').textContent = item.code || '--';
-            // updatedAt をローカルタイムゾーンに変換して表示
             document.getElementById('updatedAtDisplay').textContent = item.updatedAt ? formatLocalDateTime(item.updatedAt) : '--';
           })
           .catch(function(error) {
