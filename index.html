@@ -19,7 +19,7 @@
     
     <div class="flex flex-col justify-center items-center h-[100vh]">
       <div class="text-1xl inline-flex font-semibold mb-2">
-      ユニオンサークル募集ページ
+      ユニオンサークル募集ページ (<a href="https://x.com/addshlab" target="_blank" class="underline">X</a>)
       </div>
       <div class="!z-5 relative flex flex-col rounded-[20px] max-w-[600px] bg-white bg-clip-border shadow-3xl shadow-shadow-500 w-full !p-6 3xl:p-![18px]">
         <div class="mt-5 mb-10 h-full w-full flex flex-col">
@@ -45,9 +45,9 @@
               <span class="text-sm font-semibold text-gray-900 dark:text-white">ほげじん</span>
               <span class="text-sm font-normal text-gray-500 dark:text-gray-400">-</span>
             </div>
-            <p class="text-sm font-normal py-2.5 text-gray-900 dark:text-white">★4サンドイッチ、メタモンブロックは解散です<br><br>
-              <a href="https://x.com/addshlab" target="_blank">Xはこちら</a>
-            </p>
+            <div class="text-sm font-normal py-2.5 text-gray-900 dark:text-white">
+              <div id="chatDisplay"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -132,6 +132,7 @@
             const item = Array.isArray(data) ? data[0] : data;
             document.getElementById('statusDisplay').textContent = item.status || 'No Status';
             document.getElementById('codeDisplay').textContent = item.code || '--';
+            document.getElementById('chatDisplay').textContent = item.chat || '--';
             document.getElementById('updatedAtDisplay').textContent = item.updatedAt ? formatLocalDateTime(item.updatedAt) : '--';
           })
           .catch(function(error) {
